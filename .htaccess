@@ -1,0 +1,58 @@
+
+# ------------------------------------------------------------------------------
+# Notaliweb - Configuração de Alta Performance e Segurança
+# ------------------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1. Forçar HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # 2. Suporte para Single Page Application (SPA)
+  # Se o arquivo ou diretório solicitado não existir, redireciona para o index.html
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# 3. Compressão Gzip (mod_deflate)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/json application/xml
+</IfModule>
+
+# 4. Cache de Navegador (Expires Headers)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 month"
+  
+  # Imagens e Ícones
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  
+  # Fontes
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  
+  # CSS e JS
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# 5. Segurança
+<IfModule mod_headers.c>
+  # Impede que o site seja carregado dentro de um iframe (evita Clickjacking)
+  Header set X-Frame-Options "SAMEORIGIN"
+  # Proteção contra XSS
+  Header set X-XSS-Protection "1; mode=block"
+  # Impede o navegador de tentar adivinhar o tipo de conteúdo (MIME-type sniffing)
+  Header set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# Impede a listagem de arquivos dentro das pastas
+Options -Indexes
